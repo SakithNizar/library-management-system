@@ -7,10 +7,18 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: true
+      ddl-auto: update        # 🔹 Automatically create/update tables from entities
+    show-sql: true            # 🔹 Print SQL queries in console
+    properties:
+      hibernate:
+        format_sql: true      # 🔹 Make printed SQL more readable
 
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    enabled: true             # 🔹 Enable Flyway migrations
+    baseline-on-migrate: true # 🔹 Allow Flyway to baseline existing schema
     locations: classpath:db/migration
+
+server:
+  port: 8080                  # (optional) Run app on port 8080
+  error:
+    include-message: always   # 🔹 Show full error message on Whitelabel page
