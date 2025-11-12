@@ -2,6 +2,7 @@ package com.library.Library.Management.System.controller;
 
 import com.library.Library.Management.System.model.Category;
 import com.library.Library.Management.System.repository.CategoryRepository;
+import com.library.Library.Management.System.response.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,38 +18,36 @@ public class CategoryController {
         this.categoryRepository = categoryRepository;
     }
 
-    // ✅ GET all categories
+    // ✅ GET all
     @GetMapping
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public ApiResponse<List<Category>> getAllCategories() {
+        List<Category> list = categoryRepository.findAll();
+        return new ApiResponse<>("Fetched all categories successfully!", list);
     }
 
-    // ✅ GET category by ID
-    @GetMapping("/{id}")
-    public Category getCategoryById(@PathVariable Long id) {
-        return categoryRepository.findById(id).orElse(null);
-    }
-
-    // ✅ POST create new category
+    // ✅ POST create
     @PostMapping
-    public Category createCategory(@RequestBody Category category) {
-        return categoryRepository.save(category);
+    public ApiResponse<Category> createCategory(@RequestBody Category category) {
+        Category saved = categoryRepository.save(category);
+        return new ApiResponse<>("Category created successfully!", saved);
     }
 
-    // ✅ PUT update category name
+    // ✅ PUT update
     @PutMapping("/{id}")
-    public Category updateCategory(@PathVariable Long id, @RequestBody Category updatedCategory) {
+    public ApiResponse<Category> updateCategory(@PathVariable Long id, @RequestBody Category updatedCategory) {
         return categoryRepository.findById(id)
-                .map(category -> {
-                    category.setName(updatedCategory.getName());
-                    return categoryRepository.save(category);
+                .map(cat -> {
+                    cat.setName(updatedCategory.getName());
+                    Category saved = categoryRepository.save(cat);
+                    return new ApiResponse<>("Category updated successfully!", saved);
                 })
-                .orElse(null);
+                .orElseGet(() -> new ApiResponse<>("Category not found!", null));
     }
 
-    // ✅ DELETE category
+    // ✅ DELETE
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable Long id) {
+    public ApiResponse<String> deleteCategory(@PathVariable Long id) {
         categoryRepository.deleteById(id);
+        return new ApiResponse<>("Category deleted successfully!", "Deleted ID: " + id);
     }
 }

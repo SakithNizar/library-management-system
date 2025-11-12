@@ -2,13 +2,14 @@ package com.library.Library.Management.System.controller;
 
 import com.library.Library.Management.System.model.Book;
 import com.library.Library.Management.System.repository.BookRepository;
+import com.library.Library.Management.System.response.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
-@CrossOrigin(origins = "*") // Optional if connecting from React later
+@CrossOrigin(origins = "*")
 public class BookController {
 
     private final BookRepository bookRepository;
@@ -19,25 +20,29 @@ public class BookController {
 
     // ✅ GET all books
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    public ApiResponse<List<Book>> getAllBooks() {
+        List<Book> books = bookRepository.findAll();
+        return new ApiResponse<>("Fetched all books successfully!", books);
     }
 
-    // ✅ GET book by ID
+    // ✅ GET by ID
     @GetMapping("/{id}")
-    public Book getBookById(@PathVariable Long id) {
-        return bookRepository.findById(id).orElse(null);
+    public ApiResponse<Book> getBookById(@PathVariable Long id) {
+        return bookRepository.findById(id)
+                .map(book -> new ApiResponse<>("Book found!", book))
+                .orElseGet(() -> new ApiResponse<>("Book not found!", null));
     }
 
-    // ✅ POST create new book
+    // ✅ POST create
     @PostMapping
-    public Book createBook(@RequestBody Book book) {
-        return bookRepository.save(book);
+    public ApiResponse<Book> createBook(@RequestBody Book book) {
+        Book saved = bookRepository.save(book);
+        return new ApiResponse<>("Book added successfully!", saved);
     }
 
-    // ✅ PUT update book
+    // ✅ PUT update
     @PutMapping("/{id}")
-    public Book updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
+    public ApiResponse<Book> updateBook(@PathVariable Long id, @RequestBody Book updatedBook) {
         return bookRepository.findById(id)
                 .map(book -> {
                     book.setTitle(updatedBook.getTitle());
@@ -46,14 +51,16 @@ public class BookController {
                     book.setLanguage(updatedBook.getLanguage());
                     book.setStatus(updatedBook.getStatus());
                     book.setIsbn(updatedBook.getIsbn());
-                    return bookRepository.save(book);
+                    Book saved = bookRepository.save(book);
+                    return new ApiResponse<>("Book updated successfully!", saved);
                 })
-                .orElse(null);
+                .orElseGet(() -> new ApiResponse<>("Book not found!", null));
     }
 
-    // ✅ DELETE book
+    // ✅ DELETE
     @DeleteMapping("/{id}")
-    public void deleteBook(@PathVariable Long id) {
+    public ApiResponse<String> deleteBook(@PathVariable Long id) {
         bookRepository.deleteById(id);
+        return new ApiResponse<>("Book deleted successfully!", "Deleted ID: " + id);
     }
 }
