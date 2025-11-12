@@ -11,45 +11,62 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate reservationDate;
-    private LocalDate dueDate;
-    private String status = "ACTIVE";
-
-    // Many reservations belong to one user
+    // Each reservation belongs to one user
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Many reservations belong to one book
+    // Each reservation belongs to one book
     @ManyToOne
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
+    // Reservation details
+    @Column(name = "reservation_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "due_date", nullable = false)
+    private LocalDate endDate;
+
+    @Column(nullable = false)
+    private String status; // e.g., ACTIVE, RETURNED, CANCELLED
+
+    // Constructors
     public Reservation() {}
 
-    public Reservation(User user, Book book, LocalDate reservationDate, LocalDate dueDate) {
+    public Reservation(User user, Book book, LocalDate startDate, LocalDate endDate, String status) {
         this.user = user;
         this.book = book;
-        this.reservationDate = reservationDate;
-        this.dueDate = dueDate;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = status;
     }
 
-    // Getters & Setters
+    // Constructor with default ACTIVE status
+    public Reservation(User user, Book book, LocalDate startDate, LocalDate endDate) {
+        this.user = user;
+        this.book = book;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = "ACTIVE";
+    }
+
+    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
-
-    public LocalDate getReservationDate() { return reservationDate; }
-    public void setReservationDate(LocalDate reservationDate) { this.reservationDate = reservationDate; }
-
-    public LocalDate getDueDate() { return dueDate; }
-    public void setDueDate(LocalDate dueDate) { this.dueDate = dueDate; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
 
     public Book getBook() { return book; }
     public void setBook(Book book) { this.book = book; }
+
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

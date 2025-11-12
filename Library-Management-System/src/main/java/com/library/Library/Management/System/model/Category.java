@@ -1,5 +1,6 @@
 package com.library.Library.Management.System.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class Category {
 
     // One category can have many books
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
+    @JsonIgnore  // 🔥 Prevents infinite recursion when serializing to JSON
     private List<Book> books;
 
     // Constructors
