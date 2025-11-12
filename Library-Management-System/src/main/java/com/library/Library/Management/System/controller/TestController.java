@@ -30,7 +30,7 @@ public class TestController {
         Book book = new Book("Clean Code", "Robert C. Martin", "Programming", "English", "9780132350884", tech);
         bookRepo.save(book);
 
-        User user = new User("testuser@library.com", "pass123", "USER");
+        User user = new User("testuser@library.com", "pass123",Role.USER);
         userRepo.save(user);
 
         Reservation res = new Reservation(user, book, LocalDate.now(), LocalDate.now().plusDays(14));

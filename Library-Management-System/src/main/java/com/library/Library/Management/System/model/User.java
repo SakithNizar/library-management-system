@@ -16,15 +16,17 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role;
 
-    private boolean isBlacklisted;
+    @Column(nullable = false)
+    private boolean isBlacklisted = false;
 
     // ✅ Constructors
     public User() {}
 
-    public User(String email, String password, String role) {
+    public User(String email, String password, Role role) {
         this.email = email;
         this.password = password;
         this.role = role;
@@ -41,8 +43,8 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public Role getRole() { return role; }
+    public void setRole(Role role) { this.role = role; }
 
     public boolean isBlacklisted() { return isBlacklisted; }
     public void setBlacklisted(boolean blacklisted) { isBlacklisted = blacklisted; }
