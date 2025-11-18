@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,35 +25,56 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    // ------------------------------------------------------
+    // SIGNUP
+    // ------------------------------------------------------
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody Map<String, String> request) {
-        if (userRepository.findByEmail(request.get("email")) != null) {
+
+        String email = request.get("email");
+        String password = request.get("password");
+        String role = request.get("role");
+
+        if (userRepository.findByEmail(email) != null) {
             return ResponseEntity.badRequest().body(Map.of("message", "❌ Email already exists!"));
         }
 
         User user = new User();
-        user.setEmail(request.get("email"));
-        user.setPassword(passwordEncoder.encode(request.get("password")));
-        user.setRole(Role.valueOf(request.get("role"))); // USER or LIBRARIAN
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setRole(Role.valueOf(role));   // USER or LIBRARIAN
+
         userRepository.save(user);
 
         return ResponseEntity.ok(Map.of("message", "✅ User registered successfully!"));
     }
 
+    // ------------------------------------------------------
+    // LOGIN
+    // ------------------------------------------------------
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
-        User user = userRepository.findByEmail(request.get("email"));
 
-        if (user == null || !passwordEncoder.matches(request.get("password"), user.getPassword())) {
+        String email = request.get("email");
+        String password = request.get("password");
+
+        User user = userRepository.findByEmail(email);
+
+        if (user == null || !passwordEncoder.matches(password, user.getPassword())) {
             return ResponseEntity.status(401).body(Map.of("message", "❌ Invalid email or password"));
         }
 
+        // Generate JWT using email + role
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
 
-        return ResponseEntity.ok(Map.of(
-                "message", "✅ Login successful!",
-                "token", token,
-                "role", user.getRole().name()
-        ));
+        // Build response
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "✅ Login successful!");
+        response.put("userId", user.getId());       // 👈 ADDED
+        response.put("email", user.getEmail());     // optional
+        response.put("role", user.getRole().name());
+        response.put("token", token);
+
+        return ResponseEntity.ok(response);
     }
 }
