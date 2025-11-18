@@ -44,6 +44,15 @@ public class ReservationController {
         String email = authentication.getName();
         User user = userRepository.findByEmail(email);
 
+        if (user == null) {
+            return new ApiResponse<>("User not found!", null);
+        }
+
+        // 🚫 Block blacklisted users
+        if (user.isBlacklisted()) {
+            return new ApiResponse<>("❌ You are blacklisted and cannot make reservations!", null);
+        }
+
         // Find Book
         Book book = bookRepository.findById(request.getBookId()).orElse(null);
         if (book == null) {
@@ -73,6 +82,7 @@ public class ReservationController {
 
         return new ApiResponse<>("Reservation created successfully!", response);
     }
+
 
     // -----------------------------------------------------
     // 2️⃣ LIBRARIAN — View All Reservations
