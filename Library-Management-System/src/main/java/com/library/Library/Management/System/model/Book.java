@@ -17,6 +17,10 @@ public class Book {
     private String isbn;
     private String status = "AVAILABLE";
 
+    // NEW FIELD: cover image URL
+    @Column(name = "cover_image")
+    private String coverImageUrl;
+
     // Many books belong to one category
     @ManyToOne
     @JoinColumn(name = "category_id")
@@ -24,7 +28,8 @@ public class Book {
 
     public Book() {}
 
-    public Book(String title, String author, String genre, String language, String isbn, Category category) {
+    public Book(String title, String author, String genre, String language,
+                String isbn, Category category) {
         this.title = title;
         this.author = author;
         this.genre = genre;
@@ -57,4 +62,8 @@ public class Book {
 
     public Category getCategory() { return category; }
     public void setCategory(Category category) { this.category = category; }
+
+    // NEW Getter/Setter
+    public String getCoverImageUrl() { return coverImageUrl; }
+    public void setCoverImageUrl(String coverImageUrl) { this.coverImageUrl = coverImageUrl; }
 }
