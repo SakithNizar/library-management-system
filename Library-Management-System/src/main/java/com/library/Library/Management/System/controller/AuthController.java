@@ -4,6 +4,8 @@ import com.library.Library.Management.System.model.User;
 import com.library.Library.Management.System.model.Role;
 import com.library.Library.Management.System.repository.UserRepository;
 import com.library.Library.Management.System.security.JwtService;
+import com.library.Library.Management.System.service.EmailService;   // <-- Added
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,6 +27,10 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private EmailService emailService;   // <-- Added
+
+
     // ------------------------------------------------------
     // SIGNUP
     // ------------------------------------------------------
@@ -43,11 +49,22 @@ public class AuthController {
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
         user.setRole(Role.valueOf(role));   // USER or LIBRARIAN
+        user.setBlacklisted(false);
 
         userRepository.save(user);
 
+        // ------------------------------------------------------
+        // SEND EMAIL CONFIRMATION
+        // ------------------------------------------------------
+        emailService.sendSimpleMessage(
+                user.getEmail(),
+                "Welcome to Library Management System",
+                "Hello " + user.getEmail() + ",\n\nYour account has been created successfully. Welcome!"
+        );
+
         return ResponseEntity.ok(Map.of("message", "✅ User registered successfully!"));
     }
+
 
     // ------------------------------------------------------
     // LOGIN
@@ -64,14 +81,19 @@ public class AuthController {
             return ResponseEntity.status(401).body(Map.of("message", "❌ Invalid email or password"));
         }
 
-        // Generate JWT using email + role
+        // Block blacklisted users
+        if (user.isBlacklisted()) {
+            return ResponseEntity.status(403).body(
+                    Map.of("message", "⛔ Your account is blacklisted. Contact librarian.")
+            );
+        }
+
         String token = jwtService.generateToken(user.getEmail(), user.getRole().name());
 
-        // Build response
         Map<String, Object> response = new HashMap<>();
         response.put("message", "✅ Login successful!");
-        response.put("userId", user.getId());       // 👈 ADDED
-        response.put("email", user.getEmail());     // optional
+        response.put("userId", user.getId());
+        response.put("email", user.getEmail());
         response.put("role", user.getRole().name());
         response.put("token", token);
 
